@@ -1,3 +1,4 @@
+Chef::Resource::User.send(:include, BcpcHadoop::Helper)
 include_recipe 'bcpc-hadoop::hadoop_config'
 
 %w{hadoop-yarn-nodemanager

@@ -4,6 +4,7 @@
 
 require 'digest'
 
+Chef::Resource::User.send(:include, BcpcHadoop::Helper)
 include_recipe "bcpc-hadoop::hive_config"
 
 remote_file "#{Chef::Config[:file_cache_path]}/mysql-connector-java-5.1.34.tar.gz" do

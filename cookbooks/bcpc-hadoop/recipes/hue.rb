@@ -1,3 +1,5 @@
+Chef::Resource::User.send(:include, BcpcHadoop::Helper)
+
 include_recipe 'dpkg_autostart'
 include_recipe 'bcpc-hadoop::hue_config'
 

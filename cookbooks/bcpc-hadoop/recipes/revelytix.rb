@@ -1,3 +1,4 @@
+Chef::Resource::User.send(:include, BcpcHadoop::Helper)
 
 ruby_block "initialize-revelytix-config" do
     block do
