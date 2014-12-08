@@ -1,7 +1,7 @@
 # Cookbook Name : bcpc-hadoop
 # Recipe Name : oozie_config
 # Description : To setup oozie configuration only.
-Chef::Resource::User.send(:include, BcpcHadoop::Helper)
+Chef::Resource.send(:include, BcpcHadoop::Helper)
 
 # Create oozie realted passwords
 make_config('oozie-keystore-password', secure_password)

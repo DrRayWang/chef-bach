@@ -1,7 +1,7 @@
 # Cookbook Name : bcpc-hadoop
 # Recipe Name : hue_config
 # Description : To setup hue configuration only.
-Chef::Resource::User.send(:include, BcpcHadoop::Helper)
+Chef::Resource.send(:include, BcpcHadoop::Helper)
 
 make_config('mysql-hue-password', secure_password)
 make_config('hue-session-key', secure_password)

@@ -23,6 +23,7 @@ require 'thread'
 module BcpcHadoop
   module Helper
 
+    include Chef::Mixin::ShellOut
 #
 # Constant string which defines the default attributes which need to be retrieved from node objects
 # The format is hash { key => value , key => value }
@@ -54,7 +55,8 @@ module BcpcHadoop
          puts "++++++++++++ Created new data_bag_item \"configs/#{node.chef_environment}\""
       end
     end
-    
+    module_function :init_config
+
     def make_config(key, value)
       init_config if $dbi.nil?
       if $dbi[key].nil?
@@ -68,12 +70,14 @@ module BcpcHadoop
         return (node['bcpc']['encrypt_data_bag'] ? $edbi[key] : $dbi[key])
       end
     end
-    
+    module_function :make_config
+
     def get_config(key)
             init_config if $dbi.nil?
             puts "------------ Fetching value for key \"#{key}\""
             return (node['bcpc']['encrypt_data_bag'] ? $edbi[key] : $dbi[key])
     end
+    module_function :get_config
     
     def get_all_nodes
       results = search(:node, "role:BCPC* AND chef_environment:#{node.chef_environment}")
@@ -84,12 +88,14 @@ module BcpcHadoop
       end
       return results.sort
     end
+    module_function :get_all_nodes
     
     def get_head_nodes
       results = search(:node, "role:BCPC-Headnode AND chef_environment:#{node.chef_environment}")
       results.map!{ |x| x['hostname'] == node[:hostname] ? node : x }
       return (results == []) ? [node] : results.sort
     end
+    module_function :get_head_nodes
     
     def get_hadoop_heads
       results = search(:node, "role:BCPC-Hadoop-Head AND chef_environment:#{node.chef_environment}")
@@ -100,7 +106,8 @@ module BcpcHadoop
       end
       return results.sort
     end
-    
+    module_function :get_hadoop_heads
+
     def get_quorum_hosts
       results = search(:node, "(roles:BCPC-Hadoop-Quorumnode or role:BCPC-Hadoop-Head) AND chef_environment:#{node.chef_environment}")
       if results.any?{|x| x['hostname'] == node[:hostname]}
@@ -110,6 +117,7 @@ module BcpcHadoop
       end
       return results.sort
     end
+    module_function :get_quorum_hosts
     
     def get_hadoop_workers
       results = search(:node, "role:BCPC-Hadoop-Worker AND chef_environment:#{node.chef_environment}")
@@ -120,6 +128,7 @@ module BcpcHadoop
       end
       return results.sort
     end
+    module_function :get_hadoop_workers
     
     def get_namenodes()
       # Logic to get all namenodes if running in HA
@@ -131,6 +140,7 @@ module BcpcHadoop
       end
       return nn_hosts.sort
     end
+    module_function :get_namenodes
     
     def get_nodes_for(recipe, cookbook=cookbook_name)
       results = search(:node, "recipes:#{cookbook}\\:\\:#{recipe} AND chef_environment:#{node.chef_environment}")
@@ -140,12 +150,14 @@ module BcpcHadoop
       end
       return results.sort
     end
+    module_function :get_nodes_for
     
     def get_binary_server_url
       return("http://#{URI(Chef::Config['chef_server_url']).host}/") if node[:bcpc][:binary_server_url].nil?
       return(node[:bcpc][:binary_server_url])
     end
-    
+    module_function :get_binary_server_url
+
     def secure_password(len=20)
       pw = String.new
       while pw.length < len
@@ -153,6 +165,7 @@ module BcpcHadoop
       end
       pw
     end
+    module_function :secure_password
     
     def float_host(*args)
       if node[:bcpc][:management][:ip] != node[:bcpc][:floating][:ip]
@@ -161,6 +174,7 @@ module BcpcHadoop
         return args.join('.')
       end
     end
+    module_function :float_host
     
     def storage_host(*args)
       if node[:bcpc][:management][:ip] != node[:bcpc][:floating][:ip]
@@ -169,7 +183,8 @@ module BcpcHadoop
         return args.join('.')
       end
     end
-    
+    module_function :storage_host
+
     def znode_exists?(znode_path, zk_host="localhost:2181")
       require 'rubygems'
       require 'zookeeper'
@@ -192,6 +207,7 @@ module BcpcHadoop
       end
       return znode_found
     end
+    module_function :znode_exists?
     
     #
     # Library function to get attributes from all namenode node object
@@ -201,7 +217,8 @@ module BcpcHadoop
       ret = get_req_node_attributes(all_node_attr,HOSTNAME_NODENO_ATTR_SRCH_KEYS)
       return ret
     end
-    
+    module_function :get_namenode_attr
+
     #
     # Function to retrieve commonly used node attributes so that the call to chef server is minimized
     #
@@ -219,6 +236,7 @@ module BcpcHadoop
       node.default[:bcpc][:hadoop][:rs_hosts] = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"region_server","bcpc-hadoop")
       node.default[:bcpc][:hadoop][:mysql_hosts] = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"mysql","bcpc")
     end
+    module_function :set_hosts
     
     def zk_formatted?
       require 'rubygems'
@@ -227,6 +245,7 @@ module BcpcHadoop
       r = z.get_children(:path => "/hadoop-ha/#{node.chef_environment}")
       return (r[:rc] == 0)
     end
+    module_function :zk_formatted?
     
     #
     # Library function to get attributes for nodes that executes a particular recipe
@@ -236,7 +255,8 @@ module BcpcHadoop
       ret = get_req_node_attributes(node_objects,srch_keys)
       return ret
     end
-    
+    module_function :get_node_attributes
+
     #
     # Library function to retrieve required attributes from a array of node objects passed
     # Takes in an array of node objects and a search hash. Refer to comments for the constant
@@ -256,6 +276,7 @@ module BcpcHadoop
       end
       return result
     end
+    module_function :get_req_node_attributes
     
     #
     # Restarting of hadoop processes need to be controlled in a way that all the nodes
@@ -288,6 +309,7 @@ module BcpcHadoop
       end
       return lock_acquired
     end
+    module_function :acquire_restart_lock
     
     #
     # This function is to check whether the lock to restart a particular service is held by a node.
@@ -317,6 +339,7 @@ module BcpcHadoop
       end
       return my_lock
     end
+    module_function :my_restart_lock?
     
     #
     # Function to release the lock held by the node to restart a particular hadoop service
@@ -350,6 +373,7 @@ module BcpcHadoop
       end
       return lock_released
     end
+    module_function :rel_restart_lock
     
     #
     # Function to get the node name which is holding a particular service restart lock
@@ -375,6 +399,9 @@ module BcpcHadoop
       end
       return val
     end
+    module_function :get_restart_lock_holder
 
   end
 end
+
+Chef::Recipe.send(:include, BcpcHadoop::Helper)
