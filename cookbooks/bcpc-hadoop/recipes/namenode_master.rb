@@ -1,5 +1,5 @@
 include_recipe 'dpkg_autostart'
-Chef::Resource.send(:include, BcpcHadoop::Helper)
+Chef::Resource.send(:include, BcpcHadoop::HadoopHelper)
 require "base64"
 include_recipe 'bcpc-hadoop::hadoop_config'
 

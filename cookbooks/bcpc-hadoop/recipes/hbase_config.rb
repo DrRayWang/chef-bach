@@ -2,8 +2,6 @@
 # Recipe Name : hbase_config
 # Description : To setup habse related configuration only
 
-Chef::Resource.send(:include, BcpcHadoop::Helper)
-
 directory "/etc/hbase/conf.#{node.chef_environment}" do
   owner "root"
   group "root"

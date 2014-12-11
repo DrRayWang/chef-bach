@@ -1,4 +1,4 @@
-Chef::Resource.send(:include, BcpcHadoop::Helper)
+Chef::Resource.send(:include, BcpcHadoop::HadoopHelper, Bcpc::OSHelper)
 
 template "#{node['bcpc']['zabbix']['scripts_dir']}/run_zabbix_sender.sh" do
   source "zabbix.run_zabbix_sender.sh.erb"

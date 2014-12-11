@@ -1,3 +1,4 @@
+Chef::Resource.send(:include, Bcpc::Helper, Bcpc::OSHelper)
 #
 # Cookbook Name:: bcpc
 # Recipe:: cobalt

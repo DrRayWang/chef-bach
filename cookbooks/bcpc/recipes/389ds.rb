@@ -16,7 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
+Chef::Resource.send(:include, Bcpc::Helper, Bcpc::OSHelper)
 include_recipe "bcpc::default"
 
 make_config('389ds-admin-user', "admin")

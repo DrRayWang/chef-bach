@@ -3,7 +3,6 @@
 # Recipe Name : hive_config
 # Description : To setup hive configuration only. No hive package will be installed through this Recipe
 #
-Chef::Resource.send(:include, BcpcHadoop::Helper)
 
 #Create hive password
 make_config('mysql-hive-password', secure_password)

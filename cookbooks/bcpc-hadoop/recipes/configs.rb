@@ -1,4 +1,3 @@
-Chef::Resource.send(:include, BcpcHadoop::Helper)
 
 # disable IPv6 (e.g. for HADOOP-8568)
 case node["platform_family"]
