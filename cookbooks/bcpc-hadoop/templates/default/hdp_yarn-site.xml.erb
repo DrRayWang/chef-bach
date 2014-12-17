@@ -75,16 +75,6 @@
   <% end %>
 
   <property>
-    <name>mapreduce.jobhistory.address</name>
-    <value><%="#{float_host(@hs_hosts.first[:hostname])}:10020" if not @hs_hosts.empty?%></value>
-  </property>
-
-  <property>
-    <name>mapreduce.jobhistory.webapp.address</name>
-    <value><%="#{float_host(@hs_hosts.first[:hostname])}:19888" if not @hs_hosts.empty?%></value>
-  </property>
-
-  <property>
     <name>yarn.nodemanager.hostname</name>
     <value><%= float_host(node[:hostname]) %></value>
   </property>
@@ -156,7 +146,46 @@
   </property>
 
   <property>
-    <name>yarn.resourcemanager.scheduler.class</name>
+    <name>yarn.resourcemanager.echeduler.class</name>
     <value><%= node['bcpc']['hadoop']['yarn']['scheduler'] %></value>
   </property>
+  <% if node[:bcpc][:hadoop][:enable_kerberos] == true then %>
+  <% if node.run_list.expand(node.chef_environment).recipes.include?("bcpc-hadoop::resource_manager")  %>
+  <property>
+    <name>yarn.resourcemanager.principal</name>
+    <value><%= node[:bcpc][:hadoop][:kerberos][:data][:resourcemanager][:principal] %>/<%= node[:bcpc][:hadoop][:kerberos][:data][:resourcemanager][:princhost] == "_HOST" ? float_host(node[:fqdn]) : node[:bcpc][:hadoop][:kerberos][:data][:resourcemanager][:princhost] %>@<%= node[:bcpc][:hadoop][:realm] %></value>
+  </property>
+  <% else %>
+  <property>
+    <name>yarn.resourcemanager.principal</name>
+    <value><%= node[:bcpc][:hadoop][:kerberos][:data][:resourcemanager][:principal] %>/<%=node[:bcpc][:hadoop][:kerberos][:data][:resourcemanager][:princhost] == "_HOST" ? "_HOST" : node[:bcpc][:hadoop][:kerberos][:data][:resourcemanager][:princhost]%>@<%= node[:bcpc][:hadoop][:realm] %></value>
+  </property>
+  <% end %>
+
+  <property>
+    <name>yarn.resourcemanager.keytab</name>
+    <value><%= node[:bcpc][:hadoop][:kerberos][:keytab][:dir] %>/<%= node[:bcpc][:hadoop][:kerberos][:data][:resourcemanager][:keytab] %></value>
+  </property>
+
+  <% if node.run_list.expand(node.chef_environment).recipes.include?("bcpc-hadoop::datanode")  %>
+  <property>
+    <name>yarn.nodemanager.principal</name>
+    <value><%= node[:bcpc][:hadoop][:kerberos][:data][:nodemanager][:principal] %>/<%= node[:bcpc][:hadoop][:kerberos][:data][:nodemanager][:princhost] == "_HOST" ? float_host(node[:fqdn]) : node[:bcpc][:hadoop][:kerberos][:data][:nodemanager][:princhost] %>@<%= node[:bcpc][:hadoop][:realm] %></value>
+  </property>
+  <% else %>
+  <property>
+    <name>yarn.nodemanager.principal</name>
+    <value><%= node[:bcpc][:hadoop][:kerberos][:data][:nodemanager][:principal] %>/<%=node[:bcpc][:hadoop][:kerberos][:data][:nodemanager][:princhost] == "_HOST" ? "_HOST" : node[:bcpc][:hadoop][:kerberos][:data][:nodemanager][:princhost]%>@<%= node[:bcpc][:hadoop][:realm] %></value>
+  </property>
+  <% end %>
+  <property>
+    <name>yarn.nodemanager.keytab</name>
+    <value><%= node[:bcpc][:hadoop][:kerberos][:keytab][:dir] %>/<%= node[:bcpc][:hadoop][:kerberos][:data][:nodemanager][:keytab] %></value>
+  </property>
+
+  <property>
+    <name>yarn.resourcemanager.webapp.delegation-token-auth-filter.enabled</name>
+    <value>true</value>
+  </property>
+  <% end %>
 </configuration>

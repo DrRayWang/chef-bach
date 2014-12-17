@@ -55,6 +55,11 @@ template "/etc/sqoop/conf/sqoop-env.sh" do
   action :create
 end
 
+template "/etc/default/hadoop-hdfs-datanode" do
+  source "hdp_hadoop-hdfs-datanode.erb"
+  mode 0644
+end
+
 # Install Hive Bits
 # workaround for hcatalog dpkg not creating the hcat user it requires
 user "hcat" do 

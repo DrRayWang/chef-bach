@@ -22,3 +22,6 @@ JMX_OPTS="-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=fals
 export HADOOP_NAMENODE_OPTS="$HADOOP_NAMENODE_OPTS $JMX_OPTS -Dcom.sun.management.jmxremote.port=<%= @nn_jmx_port %>"
 export HADOOP_DATANODE_OPTS="$HADOOP_DATANODE_OPTS $JMX_OPTS -Dcom.sun.management.jmxremote.port=<%= @dn_jmx_port %>"
 <% end %>
+
+export JSVC_HOME=/usr/lib/bigtop-utils
+#HADOOP_OPTS="-Djavax.net.debug=ssl -Dsun.security.krb5.debug=true $HADOOP_OPTS"

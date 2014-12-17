@@ -40,7 +40,7 @@ mkdir -p $APT_REPO_BINS
 apt-get -y update
 
 # Install tools needed for packaging
-apt-get -y install git rubygems make pbuilder python-mock python-configobj python-support cdbs python-all-dev python-stdeb libmysqlclient-dev libldap2-dev ruby-dev gcc patch rake ruby1.9.3 ruby1.9.1-dev python-pip python-setuptools dpkg-dev apt-utils haveged libtool autoconf unzip rsync autogen
+apt-get -y install git rubygems make pbuilder python-mock python-configobj python-support cdbs python-all-dev python-stdeb libmysqlclient-dev libldap2-dev ruby-dev gcc patch rake ruby1.9.3 ruby1.9.1-dev python-pip python-setuptools dpkg-dev apt-utils haveged
 if [[ -z `gem list --local fpm | grep fpm | cut -f1 -d" "` ]]; then
   gem install fpm --no-ri --no-rdoc
 fi
@@ -100,6 +100,20 @@ if ! [[ -f gems/zookeeper.gem ]]; then
   ln -s zookeeper-*.gem zookeeper.gem || true
 fi
 FILES="zookeeper*.gem $FILES"
+
+# Get the Rubygem for kerberos
+if ! [[ -f gems/rake-compiler.gem ]]; then
+  gem fetch rake-compiler
+  ln -s rake-compiler*.gem rake-compiler.gem || true
+fi
+FILES="rake-compiler*.gem $FILES"
+
+# Get the Rubygem for kerberos
+if ! [[ -f gems/rkerberos.gem ]]; then
+  gem fetch rkerberos
+  ln -s rkerberos*.gem rkerberos.gem || true
+fi
+FILES="rkerberos*.gem $FILES"
 
 # Get Rubygem for zabbixapi
 if ! [[ -f gems/zabbixapi.gem ]]; then

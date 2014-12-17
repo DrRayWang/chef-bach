@@ -67,6 +67,12 @@ def make_config(key, value)
 	end
 end
 
+def delete_config(key)
+  init_config if $dbi.nil?
+  $dbi.delete(key) if $dbi.has_key?(key)
+  $dbi.save
+end
+
 def get_config(key)
 	init_config if $dbi.nil?
 	Chef::Log.info  "------------ Fetching value for key \"#{key}\""

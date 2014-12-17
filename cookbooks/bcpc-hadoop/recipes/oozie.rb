@@ -73,7 +73,7 @@ bash "oozie_update_shared_libs" do
   share_dir_url="#{HDFS_URL}/user/oozie/share/"
   code "#{OOZIE_LIB_PATH}/bin/oozie-setup.sh sharelib create -fs #{HDFS_URL}"
   user "oozie"
-  not_if "hdfs dfs -test -d #{HDFS_URL}/user/oozie/share/lib", :user => "hdfs"
+  not_if "sudo -h hdfs hdfs dfs -test -d #{HDFS_URL}/user/oozie/share/lib", :user => "hdfs"
 end
 
 file "#{OOZIE_LIB_PATH}/oozie.sql" do
@@ -133,9 +133,9 @@ end
 ruby_block "Oozie Down" do
   i = 0
   block do
-    status=`oozie admin -oozie http://localhost:11000/oozie -status 2>&1` 
+    status=`sudo -u oozie oozie admin -oozie http://"#{float_host(node[:fqdn])}":11000/oozie -status 2>&1` 
     while not /NORMAL/ =~ status and $?.to_i
-      status=`oozie admin -oozie http://localhost:11000/oozie -status 2>&1` 
+      status=`sudo -u oozie oozie admin -oozie http://"#{float_host(node[:fqdn])}":11000/oozie -status 2>&1` 
       if $?.to_i != 0 and i < 10
         sleep(0.5)
         i += 1
@@ -148,5 +148,5 @@ ruby_block "Oozie Down" do
     end
     Chef::Log.debug("Oozie is up - #{status}")
   end
-  not_if "oozie admin -oozie http://localhost:11000/oozie -status"
+  not_if "sudo -u oozie oozie admin -oozie http://#{float_host(node[:fqdn])}:11000/oozie -status"
 end

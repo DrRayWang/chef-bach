@@ -27,8 +27,8 @@ require 'thread'
 # to be included in the result. Attribute hierarchy can be expressed as a dot seperated string. User the following
 # as an example
 #
-HOSTNAME_ATTR_SRCH_KEYS = {'hostname' => 'hostname'}
-HOSTNAME_NODENO_ATTR_SRCH_KEYS = {'hostname' => 'hostname', 'node_number' => 'bcpc.node_number'}
+HOSTNAME_ATTR_SRCH_KEYS = {'hostname' => 'fqdn'}
+HOSTNAME_NODENO_ATTR_SRCH_KEYS = {'hostname' => 'fqdn', 'node_number' => 'bcpc.node_number'}
 MGMT_IP_ATTR_SRCH_KEYS = {'mgmt_ip' => 'bcpc.management.ip'}
 
 def init_config

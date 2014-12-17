@@ -32,6 +32,7 @@
       "bootstrap": {
         "interface" : "eth0",
         "pxe_interface" : "eth1",
+        "hostname" : "bcpc-bootstrap",
         "server" : "10.0.100.3",
         "dhcp_subnet" : "10.0.100.0",
         "dhcp_range" : "10.0.100.14 10.0.100.250"
@@ -40,6 +41,28 @@
       "hadoop" : {
         "hdfs" : {
           "dfs_replication_factor" : 1
+        },
+        "realm" : "BCPC.EXAMPLE.COM",
+        "enable_kerberos": false,
+        "kerberos": {
+          "data": {
+            "namenode" : {"principal" : "nn", "keytab" : "nn.service.keytab", "owner" : "hdfs", "princhost": "_HOST", "perms": "0600"},
+            "datanode" : {"principal" : "dn", "keytab" : "dn.service.keytab", "owner" : "hdfs", "princhost": "_HOST", "perms": "0600"},
+            "journalnode" : {"principal" : "jn", "keytab" : "jn.service.keytab", "owner" : "hdfs", "princhost": "_HOST", "perms": "0600"},
+            "resourcemanager" : {"principal" : "rm", "keytab" : "rm.service.keytab", "owner" : "yarn", "princhost": "_HOST", "perms": "0600"},
+            "nodemanager" : {"principal" : "nm", "keytab" : "nm.service.keytab", "owner" : "yarn", "princhost": "_HOST", "perms": "0600"},
+            "historyserver" : {"principal" : "jhs", "keytab" : "jhs.service.keytab", "owner" : "mapred", "princhost": "_HOST", "perms": "0600"},
+            "spnego" : {"principal" : "HTTP", "keytab" : "spnego.service.keytab", "owner" : "hdfs", "princhost": "_HOST", "perms": "0644"},
+            "zookeeper" : {"principal" : "zookeeper", "keytab" : "zookeeper.service.keytab", "owner" : "zookeeper", "princhost": "_HOST", "perms": "0600"},
+            "hbase" : {"principal" : "hbase", "keytab" : "hbase.service.keytab", "owner" : "hbase", "princhost": "_HOST", "perms": "0600"},
+            "httpfs" : {"principal" : "httpfs", "keytab" : "httpfs.service.keytab", "owner" : "httpfs", "princhost": "_HOST", "perms": "0600"},
+            "hive" : {"principal" : "hive", "keytab" : "hive.service.keytab", "owner" : "hive", "princhost": "_HOST", "perms": "0600"},
+            "oozie" : {"principal" : "oozie", "keytab" : "oozie.service.keytab", "owner" : "oozie", "princhost": "_HOST", "perms": "0600"}
+          },
+          "keytab": { 
+            "dir": "/etc/security/keytabs",
+            "recreate": false
+          }
         },
         "disks" : ["sdb" , "sdc" ],
         "distribution" : {
