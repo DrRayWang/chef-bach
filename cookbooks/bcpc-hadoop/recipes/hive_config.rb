@@ -5,7 +5,7 @@
 #
 
 #Create hive password
-make_config('mysql-hive-password', secure_password)
+Bcpc::OSHelper.set_config(node, 'mysql-hive-password', Bcpc::Helper.secure_password)
 
 %w{hive webhcat hcat hive-hcatalog}.each do |w|
   directory "/etc/#{w}/conf.#{node.chef_environment}" do
@@ -32,6 +32,7 @@ end
    template "/etc/hive/conf/#{t}" do
      source "hv_#{t}.erb"
      mode 0644
+     helpers(Bcpc::OSHelper)
      variables(:mysql_hosts => node[:bcpc][:hadoop][:mysql_hosts].map{ |m| m[:hostname] },
                :zk_hosts => node[:bcpc][:hadoop][:zookeeper][:servers],
                :hive_hosts => node[:bcpc][:hadoop][:hive_hosts])

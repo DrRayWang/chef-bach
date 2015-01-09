@@ -1,4 +1,3 @@
-Chef::Resource.send(:include, Bcpc::Helper, Bcpc::OSHelper)
 #
 # Cookbook Name:: bcpc
 # Recipe:: cobbler-centos
@@ -19,20 +18,22 @@ Chef::Resource.send(:include, Bcpc::Helper, Bcpc::OSHelper)
 #
 
 include_recipe "bcpc::cobbler"
+#Chef.send(:include, Bcpc::OSHelper)
 
 template "/var/lib/cobbler/kickstarts/bcpc_centos_host.preseed" do
     source "cobbler.bcpc_centos_host.preseed.erb"
     mode 00644
+    helpers(Bcpc::OSHelper)
 end
 
 remote_file "/tmp/centos-6-initrd.img" do
-    source "#{get_binary_server_url}/centos-6-initrd.img"
+    source "#{Bcpc::OSHelper.get_binary_server_url(node)}/centos-6-initrd.img"
     owner "root"
     mode 00444
 end
 
 remote_file "/tmp/centos-6-vmlinuz" do
-    source "#{get_binary_server_url}/centos-6-vmlinuz"
+    source "#{Bcpc::OSHelper.get_binary_server_url(node)}/centos-6-vmlinuz"
     owner "root"
     mode 00444
 end

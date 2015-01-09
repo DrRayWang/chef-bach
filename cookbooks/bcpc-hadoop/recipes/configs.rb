@@ -44,7 +44,7 @@ sysctl_param 'vm.swappiness' do
 end
 
 # Populate node attributes for all kind of hosts
-set_hosts
+BcpcHadoop::HadoopHelper.set_hosts(node)
 
 package "bigtop-jsvc"
 

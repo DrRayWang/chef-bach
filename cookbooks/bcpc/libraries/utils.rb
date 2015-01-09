@@ -24,7 +24,6 @@ require 'ipaddr'
 
 module Bcpc
   module Helper
-
     def power_of_2(number)
     	result = 1
     	while (result < number) do result <<= 1 end

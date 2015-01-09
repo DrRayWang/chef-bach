@@ -34,7 +34,7 @@ module BcpcHadoop
     HOSTNAME_NODENO_ATTR_SRCH_KEYS = {'hostname' => 'hostname', 'node_number' => 'bcpc.node_number'}
     MGMT_IP_ATTR_SRCH_KEYS = {'mgmt_ip' => 'bcpc.management.ip'}
     
-    def get_all_nodes
+    def get_all_nodes(node=node)
       results = search(:node, "role:BCPC* AND chef_environment:#{node.chef_environment}")
       if results.any?{|x| x['hostname'] == node['hostname']}
         results.map!{|x| x['hostname'] == node['hostname'] ? node : x}
@@ -45,7 +45,7 @@ module BcpcHadoop
     end
     module_function :get_all_nodes
     
-    def get_hadoop_heads
+    def get_hadoop_heads(node=node)
       results = search(:node, "role:BCPC-Hadoop-Head AND chef_environment:#{node.chef_environment}")
       if results.any?{|x| x['hostname'] == node[:hostname]}
         results.map!{|x| x['hostname'] == node[:hostname] ? node : x}
@@ -56,7 +56,7 @@ module BcpcHadoop
     end
     module_function :get_hadoop_heads
 
-    def get_quorum_hosts
+    def get_quorum_hosts(node=node)
       results = search(:node, "(roles:BCPC-Hadoop-Quorumnode or role:BCPC-Hadoop-Head) AND chef_environment:#{node.chef_environment}")
       if results.any?{|x| x['hostname'] == node[:hostname]}
         results.map!{|x| x['hostname'] == node[:hostname] ? node : x}
@@ -67,7 +67,7 @@ module BcpcHadoop
     end
     module_function :get_quorum_hosts
     
-    def get_hadoop_workers
+    def get_hadoop_workers(node=node)
       results = search(:node, "role:BCPC-Hadoop-Worker AND chef_environment:#{node.chef_environment}")
       if results.any?{|x| x['hostname'] == node[:hostname]}
         results.map!{|x| x['hostname'] == node[:hostname] ? node : x}
@@ -78,13 +78,13 @@ module BcpcHadoop
     end
     module_function :get_hadoop_workers
     
-    def get_namenodes()
+    def get_namenodes(node=node,cookbook=cookbook_name)
       # Logic to get all namenodes if running in HA
       # or to get only the master namenode if not running in HA
       if node['bcpc']['hadoop']['hdfs']['HA'] then
-        nn_hosts = get_nodes_for("namenode*")
+        nn_hosts = get_nodes_for("namenode*",node,cookbook_name)
       else
-        nn_hosts = get_nodes_for("namenode_no_HA")
+        nn_hosts = get_nodes_for("namenode_no_HA",node,cookbook_name)
       end
       return nn_hosts.sort
     end
@@ -117,9 +117,9 @@ module BcpcHadoop
     #
     # Library function to get attributes from all namenode node object
     #
-    def get_namenode_attr
-      all_node_attr = get_namenodes()
-      ret = get_req_node_attributes(all_node_attr,HOSTNAME_NODENO_ATTR_SRCH_KEYS)
+    def get_namenode_attr(node=node)
+      all_node_attr = get_namenodes(node)
+      ret = Bcpc::OSHelper.get_req_node_attributes(all_node_attr,HOSTNAME_NODENO_ATTR_SRCH_KEYS)
       return ret
     end
     module_function :get_namenode_attr
@@ -127,23 +127,23 @@ module BcpcHadoop
     #
     # Function to retrieve commonly used node attributes so that the call to chef server is minimized
     #
-    def set_hosts
-      node.default[:bcpc][:hadoop][:nn_hosts] = get_namenode_attr()
-      node.default[:bcpc][:hadoop][:zookeeper][:servers] = get_node_attributes(HOSTNAME_NODENO_ATTR_SRCH_KEYS,"zookeeper_server","bcpc-hadoop")
-      node.default[:bcpc][:hadoop][:jn_hosts] = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"journalnode","bcpc-hadoop")
-      node.default[:bcpc][:hadoop][:rm_hosts] = get_node_attributes(HOSTNAME_NODENO_ATTR_SRCH_KEYS,"resource_manager","bcpc-hadoop")
-      node.default[:bcpc][:hadoop][:hs_hosts] = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"historyserver","bcpc-hadoop")
-      node.default[:bcpc][:hadoop][:dn_hosts] = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"datanode","bcpc-hadoop")
-      node.default[:bcpc][:hadoop][:hb_hosts] = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"hbase_master","bcpc-hadoop")
-      node.default[:bcpc][:hadoop][:hive_hosts] = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"hive_metastore","bcpc-hadoop")
-      node.default[:bcpc][:hadoop][:oozie_hosts]  = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"oozie","bcpc-hadoop")
-      node.default[:bcpc][:hadoop][:httpfs_hosts] = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"httpfs","bcpc-hadoop")
-      node.default[:bcpc][:hadoop][:rs_hosts] = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"region_server","bcpc-hadoop")
-      node.default[:bcpc][:hadoop][:mysql_hosts] = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"mysql","bcpc")
+    def set_hosts(node=node)
+      node.default[:bcpc][:hadoop][:nn_hosts] = get_namenode_attr(node)
+      node.default[:bcpc][:hadoop][:zookeeper][:servers] = Bcpc::OSHelper.get_node_attributes(HOSTNAME_NODENO_ATTR_SRCH_KEYS,"zookeeper_server",node,"bcpc-hadoop")
+      node.default[:bcpc][:hadoop][:jn_hosts] = Bcpc::OSHelper.get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"journalnode",node,"bcpc-hadoop")
+      node.default[:bcpc][:hadoop][:rm_hosts] = Bcpc::OSHelper.get_node_attributes(HOSTNAME_NODENO_ATTR_SRCH_KEYS,"resource_manager",node,"bcpc-hadoop")
+      node.default[:bcpc][:hadoop][:hs_hosts] = Bcpc::OSHelper.get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"historyserver",node,"bcpc-hadoop")
+      node.default[:bcpc][:hadoop][:dn_hosts] = Bcpc::OSHelper.get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"datanode",node,"bcpc-hadoop")
+      node.default[:bcpc][:hadoop][:hb_hosts] = Bcpc::OSHelper.get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"hbase_master",node,"bcpc-hadoop")
+      node.default[:bcpc][:hadoop][:hive_hosts] = Bcpc::OSHelper.get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"hive_metastore",node,"bcpc-hadoop")
+      node.default[:bcpc][:hadoop][:oozie_hosts]  =Bcpc::OSHelper.get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"oozie",node,"bcpc-hadoop")
+      node.default[:bcpc][:hadoop][:httpfs_hosts] = Bcpc::OSHelper.get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"httpfs",node,"bcpc-hadoop")
+      node.default[:bcpc][:hadoop][:rs_hosts] = Bcpc::OSHelper.get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"region_server",node,"bcpc-hadoop")
+      node.default[:bcpc][:hadoop][:mysql_hosts] = Bcpc::OSHelper.get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"mysql",node,"bcpc")
     end
     module_function :set_hosts
     
-    def zk_formatted?
+    def zk_formatted?(node=node)
       require 'rubygems'
       require 'zookeeper'
       z = Zookeeper.new("localhost:2181")

@@ -1,4 +1,4 @@
-Chef::Resource.send(:include, Bcpc::Helper, Bcpc::OSHelper)
+Chef::Resource.send(:include, Bcpc::OSHelper)
 #
 # Cookbook Name:: bcpc
 # Recipe:: default
