@@ -86,8 +86,8 @@ module Bcpc
     end
 
     # Get all nodes for this Chef environment
-    def get_all_nodes(node=node)
-    	results = search(:node, "chef_environment:#{node.chef_environment}")
+    def get_all_nodes(node=node, search=method(:search))
+    	results = search.call(:node, "chef_environment:#{node.chef_environment}")
     	if results.any?{|x| x['hostname'] == node['hostname']}
     		results.map!{|x| x['hostname'] == node['hostname'] ? node : x}
     	else
@@ -96,8 +96,8 @@ module Bcpc
     	return results.sort
     end
     
-    def get_ceph_osd_nodes(node=node)
-    	results = search(:node, "recipes:bcpc\\:\\:ceph-work AND chef_environment:#{node.chef_environment}")
+    def get_ceph_osd_nodes(node=node, search=method(:search))
+    	results = search.call(:node, "recipes:bcpc\\:\\:ceph-work AND chef_environment:#{node.chef_environment}")
     	if results.any?{|x| x['hostname'] == node[:hostname]}
     		results.map!{|x| x['hostname'] == node[:hostname] ? node : x}
     	else
@@ -123,15 +123,15 @@ module Bcpc
       return headnodes.sort
     end
     
-    def get_head_nodes(node=node)
-      results = search(:node, "role:BCPC-Headnode AND chef_environment:#{node.chef_environment}")
+    def get_head_nodes(node=node, search=method(:search))
+      results = search.call(:node, "role:BCPC-Headnode AND chef_environment:#{node.chef_environment}")
       # this returns the node object for the current host before it has been set in Postgress
       results.map!{ |x| x.hostname == node.hostname ? node : x }
       return (results.empty?) ? [node] : results.sort
     end
     
-    def get_nodes_for(recipe, node=node, cookbook=cookbook_name)
-      results = search(:node, "recipes:#{cookbook}\\:\\:#{recipe} AND chef_environment:#{node.chef_environment}")
+    def get_nodes_for(recipe, node=node, cookbook=cookbook_name, search=method(:search))
+      results = search.call(:node, "recipes:#{cookbook}\\:\\:#{recipe} AND chef_environment:#{node.chef_environment}")
       results.map!{ |x| x['hostname'] == node[:hostname] ? node : x }
       if node.run_list.expand(node.chef_environment).recipes.include?("#{cookbook}::#{recipe}") and not results.include?(node)
         results.push(node)
@@ -142,8 +142,8 @@ module Bcpc
     #
     # Library function to get attributes for nodes that executes a particular recipe
     #
-    def get_node_attributes(srch_keys,recipe,node=node,cookbook=cookbook_name)
-      node_objects = get_nodes_for(recipe,node,cookbook)
+    def get_node_attributes(srch_keys,recipe,node=node,cookbook=cookbook_name, search_ref=method(:search))
+      node_objects = get_nodes_for(recipe,node,cookbook,search_ref)
       ret = get_req_node_attributes(node_objects,srch_keys)
       return ret
     end
@@ -181,7 +181,7 @@ module Bcpc
         Base64.encode64(key).strip
     end
     
-    def float_host(*args)
+    def float_host(node,*args)
       if node[:bcpc][:management][:ip] != node[:bcpc][:floating][:ip]
         return ("f-" + args.join('.'))
       else
@@ -189,7 +189,7 @@ module Bcpc
       end
     end
     
-    def storage_host(*args)
+    def storage_host(node,*args)
       if node[:bcpc][:management][:ip] != node[:bcpc][:floating][:ip]
         return ("s-" + args.join('.'))
       else

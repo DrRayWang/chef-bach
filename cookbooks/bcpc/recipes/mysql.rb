@@ -80,8 +80,8 @@ template "/etc/mysql/conf.d/wsrep.cnf" do
   source "wsrep.cnf.erb"
   mode 00644
   helpers(Bcpc::OSHelper)
-  variables( :max_connections => [Bcpc::OSHelper.get_nodes_for('mysql',node,'bcpc').length*50+Bcpc::OSHelper.get_all_nodes(node).length*5, 200].max,
-             :servers => Bcpc::OSHelper.get_nodes_for('mysql',node,'bcpc') )
+  variables( :max_connections => [Bcpc::OSHelper.get_nodes_for('mysql',node,'bcpc', method(:search)).length*50+Bcpc::OSHelper.get_all_nodes(node, method(:search)).length*5, 200].max,
+             :servers => Bcpc::OSHelper.get_nodes_for('mysql',node,'bcpc', method(:search)) )
   notifies :restart, "service[mysql]", :immediate
 end
 

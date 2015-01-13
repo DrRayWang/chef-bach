@@ -105,7 +105,7 @@ nsds5ReplicaBindDN: #{Bcpc::OSHelper.get_config(node, '389ds-replication-user')}
     end
 end
 
-Bcpc::OSHelper.get_head_nodes(node).each do |server|
+Bcpc::OSHelper.get_head_nodes(node, method( :search )).each do |server|
     if server['hostname'] != node[:hostname]
         ruby_block "setup-ldap-consumption-from-#{server['hostname']}" do
             block do

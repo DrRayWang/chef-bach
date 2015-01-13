@@ -161,7 +161,7 @@ cookbook_file "/usr/local/bin/check" do
   mode "00755"
 end
 
-if Bcpc::OSHelper.get_nodes_for("nova-head",node,cookbook_name).length > 0
+if Bcpc::OSHelper.get_nodes_for("nova-head",node,cookbook_name, method(:search)).length > 0
   template  "/usr/local/etc/checks/default.yml" do
     source "checks/default_openstack.yml.erb"
     owner node[:bcpc][:zabbix][:user]

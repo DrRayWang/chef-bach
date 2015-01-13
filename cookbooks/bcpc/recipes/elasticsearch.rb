@@ -37,8 +37,8 @@ template "/etc/elasticsearch/elasticsearch.yml" do
     owner "root"
     group "root"
     mode 00644
-    variables( :servers => Bcpc::OSHelper.get_head_nodes(node),
-               :min_quorum => Bcpc::OSHelper.get_head_nodes(node).length/2 + 1 )
+    variables( :servers => Bcpc::OSHelper.get_head_nodes(node, method( :search )),
+               :min_quorum => Bcpc::OSHelper.get_head_nodes(node, method( :search )).length/2 + 1 )
     notifies :restart, "service[elasticsearch]", :immediately
 end
 
@@ -65,7 +65,7 @@ package "curl" do
 end
 
 bash "set-elasticsearch-replicas" do
-    min_quorum = Bcpc::OSHelper.get_head_nodes(node).length/2 + 1
+    min_quorum = Bcpc::OSHelper.get_head_nodes(node, method( :search )).length/2 + 1
     code <<-EOH
         curl -XPUT '#{node[:bcpc][:management][:vip]}:9200/_settings' -d '
         {

@@ -87,7 +87,7 @@ end
 node[:bcpc][:ceph][:enabled_pools].each do |type|
     bash "create-cinder-rados-pool-#{type}" do
         user "root"
-        optimal = Bcpc::Helper.power_of_2(Bcpc::OSHelper.get_ceph_osd_nodes(node).length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:volumes][:replicas]*node[:bcpc][:ceph][:volumes][:portion]/100/node[:bcpc][:ceph][:enabled_pools].length)
+        optimal = Bcpc::Helper.power_of_2(Bcpc::OSHelper.get_ceph_osd_nodes(node, method( :search )).length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:volumes][:replicas]*node[:bcpc][:ceph][:volumes][:portion]/100/node[:bcpc][:ceph][:enabled_pools].length)
         code <<-EOH
             ceph osd pool create #{node[:bcpc][:ceph][:volumes][:name]}-#{type} #{optimal}
             ceph osd pool set #{node[:bcpc][:ceph][:volumes][:name]}-#{type} crush_ruleset #{(type=="ssd")?3:4}
@@ -103,7 +103,7 @@ node[:bcpc][:ceph][:enabled_pools].each do |type|
 
     bash "set-cinder-rados-pool-pgs-#{type}" do
         user "root"
-        optimal = Bcpc::Helper.power_of_2(Bcpc::OSHelper.get_ceph_osd_nodes(node).length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:volumes][:replicas]*node[:bcpc][:ceph][:volumes][:portion]/100/node[:bcpc][:ceph][:enabled_pools].length)
+        optimal = Bcpc::Helper.power_of_2(Bcpc::OSHelper.get_ceph_osd_nodes(node, method( :search )).length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:volumes][:replicas]*node[:bcpc][:ceph][:volumes][:portion]/100/node[:bcpc][:ceph][:enabled_pools].length)
         code "ceph osd pool set #{node[:bcpc][:ceph][:volumes][:name]}-#{type} pg_num #{optimal}"
         not_if "((`ceph osd pool get #{node[:bcpc][:ceph][:volumes][:name]}-#{type} pg_num | awk '{print $2}'` >= #{optimal}))"
     end

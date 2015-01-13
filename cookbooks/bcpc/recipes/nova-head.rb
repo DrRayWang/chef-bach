@@ -86,7 +86,7 @@ end
 
 ruby_block "reap-dead-servers-from-nova" do
     block do
-        all_hosts = Bcpc::OSHelper.get_all_nodes(node).collect{|x| x['hostname']}
+        all_hosts = Bcpc::OSHelper.get_all_nodes(node, method(:search)).collect{|x| x['hostname']}
         nova_hosts = %x[nova-manage service list | awk '{print $2}' | grep -ve "^Host$" | uniq].split
         nova_hosts.each do |host|
             if not all_hosts.include?(host)

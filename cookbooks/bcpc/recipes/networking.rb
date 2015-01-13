@@ -25,7 +25,7 @@ template "/etc/hosts" do
     source "hosts.erb"
     mode 00644
     helpers(Bcpc::OSHelper)
-    variables( :servers => Bcpc::OSHelper.get_all_nodes(node) )
+    variables( :servers => Bcpc::OSHelper.get_all_nodes(node, method(:search)) )
 end
 
 template "/etc/ssh/sshd_config" do
@@ -159,7 +159,7 @@ if node[:bcpc][:floating][:interface] != node[:bcpc][:management][:interface]
     # but the first entry in our master list is also the only one in pdns,
     # so make that the last entry to minimize double failures when upstream dies.
     resolvers=node[:bcpc][:dns_servers].dup
-    if node[:bcpc][:management][:vip] and Bcpc::OSHelper.get_nodes_for("powerdns",node,cookbook_name).length() > 0
+    if node[:bcpc][:management][:vip] and Bcpc::OSHelper.get_nodes_for("powerdns",node,cookbook_name, method(:search)).length() > 0
       resolvers.push resolvers.shift
       resolvers.unshift node[:bcpc][:management][:vip]
     end

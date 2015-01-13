@@ -17,7 +17,7 @@ bash "update-hbase-conf-alternatives" do
   }
 end
 
-if Bcpc::OSHelper.get_nodes_for("powerdns", node, "bcpc").length > 0
+if Bcpc::OSHelper.get_nodes_for("powerdns", node, "bcpc", method(:search)).length > 0
  dns_server = node[:bcpc][:management][:vip]
 else
  dns_server = node[:bcpc][:dns_servers][0]

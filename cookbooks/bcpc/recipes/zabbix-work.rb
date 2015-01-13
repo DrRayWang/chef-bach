@@ -89,7 +89,7 @@ directory "/usr/local/etc/checks" do
   mode 00775
 end 
 
-if Bcpc::OSHelper.get_nodes_for("nova-head",node,cookbook_name).length > 0
+if Bcpc::OSHelper.get_nodes_for("nova-head",node,cookbook_name, method(:search)).length > 0
   %w{ float_ips }.each do |cc| 
     template  "/usr/local/etc/checks/#{cc}.yml" do
       source "checks/#{cc}.yml.erb"

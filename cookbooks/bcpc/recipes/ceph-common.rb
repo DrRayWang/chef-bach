@@ -54,5 +54,5 @@ template '/etc/ceph/ceph.conf' do
     source 'ceph.conf.erb'
     mode '0644'
     helpers(Bcpc::OSHelper)
-    variables( :servers => Bcpc::OSHelper.get_head_nodes(node) )
+    variables( :servers => Bcpc::OSHelper.get_head_nodes(node, method( :search )) )
 end

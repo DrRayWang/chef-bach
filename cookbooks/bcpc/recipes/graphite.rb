@@ -73,7 +73,7 @@ ruby_block "graphite_ip" do
   end
 end
 
-mysql_servers = Bcpc::OSHelper.get_node_attributes(MGMT_IP_GRAPHITE_WEBPORT_ATTR_SRCH_KEYS,"mysql",node,"bcpc")
+mysql_servers = Bcpc::OSHelper.get_node_attributes(MGMT_IP_GRAPHITE_WEBPORT_ATTR_SRCH_KEYS,"mysql",node,"bcpc",method(:search))
 
 template "/opt/graphite/conf/carbon.conf" do
     source "carbon.conf.erb"

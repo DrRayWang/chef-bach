@@ -98,7 +98,7 @@ service "rabbitmq-server" do
     action [ :enable, :start ]
 end
 
-Bcpc::OSHelper.get_head_nodes(node).each do |server|
+Bcpc::OSHelper.get_head_nodes(node, method( :search )).each do |server|
     if server['hostname'] != node[:hostname]
         bash "rabbitmq-clustering-with-#{server['hostname']}" do
             code <<-EOH
@@ -119,7 +119,7 @@ ruby_block "set-rabbitmq-guest-password" do
 end
 
 bash "set-rabbitmq-ha-policy" do
-    min_quorum = Bcpc::OSHelper.get_head_nodes(node).length/2 + 1
+    min_quorum = Bcpc::OSHelper.get_head_nodes(node, method( :search )).length/2 + 1
     code <<-EOH
         rabbitmqctl set_policy HA '^(?!(amq\.|[a-f0-9]{32})).*' '{"ha-mode": "exactly", "ha-params": #{min_quorum}}'
     EOH
@@ -158,7 +158,7 @@ end
 
 ruby_block "reap-dead-rabbitmq-servers" do
     block do
-        head_names = Bcpc::OSHelper.get_head_nodes(node).collect{|x| x['hostname']}
+        head_names = Bcpc::OSHelper.get_head_nodes(node, method( :search )).collect{|x| x['hostname']}
         status = %x[ rabbitmqctl cluster_status | grep nodes | grep disc ].strip
         status.scan(/(?:'rabbit@([a-zA-Z0-9-]+)',?)+?/).each do |server|
             if not head_names.include?(server[0])

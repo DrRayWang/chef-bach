@@ -34,7 +34,7 @@ end
 
 ruby_block "add-ceph-mon-hints" do
     block do
-        Bcpc::OSHelper.get_head_nodes(node).each do |server|
+        Bcpc::OSHelper.get_head_nodes(node, method( :search )).each do |server|
             system "ceph --admin-daemon /var/run/ceph/ceph-mon.#{node[:hostname]}.asok \
                 add_bootstrap_peer_hint #{server['bcpc']['storage']['ip']}:6789" 
         end
@@ -69,7 +69,7 @@ end
 
 ruby_block "reap-dead-ceph-mon-servers" do
     block do
-        head_names = Bcpc::OSHelper.get_head_nodes(node).collect{|x| x['hostname']}
+        head_names = Bcpc::OSHelper.get_head_nodes(node, method( :search )).collect{|x| x['hostname']}
         status = JSON.parse(%x[ceph --admin-daemon /var/run/ceph/ceph-mon.#{node[:hostname]}.asok mon_status])
         status['monmap']['mons'].collect{|x| x['name']}.each do |server|
             if not head_names.include?(server)
@@ -152,7 +152,7 @@ bash "ceph-add-crush-rules" do
     not_if "grep ssd /tmp/crush-map.txt"
 end
 
-if Bcpc::OSHelper.get_head_nodes(node).length == 1; then
+if Bcpc::OSHelper.get_head_nodes(node, method( :search )).length == 1; then
     rule = (node[:bcpc][:ceph][:ssd_disks].length > 0) ? 3 : 4
     %w{data metadata rbd}.each do |pool|
         bash "move-#{pool}-rados-pool" do

@@ -60,7 +60,7 @@ template "/etc/diamond/diamond.conf" do
     group "root"
     mode 00600
     helpers(Bcpc::OSHelper)
-    variables( :servers => Bcpc::OSHelper.get_head_nodes(node) )
+    variables( :servers => Bcpc::OSHelper.get_head_nodes(node, method( :search )) )
     notifies :restart, "service[diamond]", :delayed
 end
 

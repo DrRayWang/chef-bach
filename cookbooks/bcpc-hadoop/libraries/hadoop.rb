@@ -22,7 +22,6 @@ require 'thread'
 
 module BcpcHadoop
   module HadoopHelper
-
 #
 # Constant string which defines the default attributes which need to be retrieved from node objects
 # The format is hash { key => value , key => value }
@@ -34,8 +33,8 @@ module BcpcHadoop
     HOSTNAME_NODENO_ATTR_SRCH_KEYS = {'hostname' => 'hostname', 'node_number' => 'bcpc.node_number'}
     MGMT_IP_ATTR_SRCH_KEYS = {'mgmt_ip' => 'bcpc.management.ip'}
     
-    def get_all_nodes(node=node)
-      results = search(:node, "role:BCPC* AND chef_environment:#{node.chef_environment}")
+    def get_all_nodes(node=node, search=method(:search))
+      results = search.call(:node, "role:BCPC* AND chef_environment:#{node.chef_environment}")
       if results.any?{|x| x['hostname'] == node['hostname']}
         results.map!{|x| x['hostname'] == node['hostname'] ? node : x}
       else
@@ -78,13 +77,13 @@ module BcpcHadoop
     end
     module_function :get_hadoop_workers
     
-    def get_namenodes(node=node,cookbook=cookbook_name)
+    def get_namenodes(node=node,cookbook=cookbook_name, search=method(:search))
       # Logic to get all namenodes if running in HA
       # or to get only the master namenode if not running in HA
       if node['bcpc']['hadoop']['hdfs']['HA'] then
-        nn_hosts = get_nodes_for("namenode*",node,cookbook_name)
+        nn_hosts = Bcpc::OSHelper.get_nodes_for("namenode*",node,cookbook,search)
       else
-        nn_hosts = get_nodes_for("namenode_no_HA",node,cookbook_name)
+        nn_hosts = Bcpc::OSHelper.get_nodes_for("namenode_no_HA",node,cookbook,search)
       end
       return nn_hosts.sort
     end
@@ -117,8 +116,8 @@ module BcpcHadoop
     #
     # Library function to get attributes from all namenode node object
     #
-    def get_namenode_attr(node=node)
-      all_node_attr = get_namenodes(node)
+    def get_namenode_attr(node=node, cookbook=cookbook_name, search=method(:search))
+      all_node_attr = get_namenodes(node, cookbook, search)
       ret = Bcpc::OSHelper.get_req_node_attributes(all_node_attr,HOSTNAME_NODENO_ATTR_SRCH_KEYS)
       return ret
     end
@@ -127,19 +126,19 @@ module BcpcHadoop
     #
     # Function to retrieve commonly used node attributes so that the call to chef server is minimized
     #
-    def set_hosts(node=node)
-      node.default[:bcpc][:hadoop][:nn_hosts] = get_namenode_attr(node)
-      node.default[:bcpc][:hadoop][:zookeeper][:servers] = Bcpc::OSHelper.get_node_attributes(HOSTNAME_NODENO_ATTR_SRCH_KEYS,"zookeeper_server",node,"bcpc-hadoop")
-      node.default[:bcpc][:hadoop][:jn_hosts] = Bcpc::OSHelper.get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"journalnode",node,"bcpc-hadoop")
-      node.default[:bcpc][:hadoop][:rm_hosts] = Bcpc::OSHelper.get_node_attributes(HOSTNAME_NODENO_ATTR_SRCH_KEYS,"resource_manager",node,"bcpc-hadoop")
-      node.default[:bcpc][:hadoop][:hs_hosts] = Bcpc::OSHelper.get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"historyserver",node,"bcpc-hadoop")
-      node.default[:bcpc][:hadoop][:dn_hosts] = Bcpc::OSHelper.get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"datanode",node,"bcpc-hadoop")
-      node.default[:bcpc][:hadoop][:hb_hosts] = Bcpc::OSHelper.get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"hbase_master",node,"bcpc-hadoop")
-      node.default[:bcpc][:hadoop][:hive_hosts] = Bcpc::OSHelper.get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"hive_metastore",node,"bcpc-hadoop")
-      node.default[:bcpc][:hadoop][:oozie_hosts]  =Bcpc::OSHelper.get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"oozie",node,"bcpc-hadoop")
-      node.default[:bcpc][:hadoop][:httpfs_hosts] = Bcpc::OSHelper.get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"httpfs",node,"bcpc-hadoop")
-      node.default[:bcpc][:hadoop][:rs_hosts] = Bcpc::OSHelper.get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"region_server",node,"bcpc-hadoop")
-      node.default[:bcpc][:hadoop][:mysql_hosts] = Bcpc::OSHelper.get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"mysql",node,"bcpc")
+    def set_hosts(node=node, cookbook=cookbook_name, search=method(:search))
+      node.default[:bcpc][:hadoop][:nn_hosts] = get_namenode_attr(node,cookbook,search)
+      node.default[:bcpc][:hadoop][:zookeeper][:servers] = Bcpc::OSHelper.get_node_attributes(HOSTNAME_NODENO_ATTR_SRCH_KEYS,"zookeeper_server",node,"bcpc-hadoop",search)
+      node.default[:bcpc][:hadoop][:jn_hosts] = Bcpc::OSHelper.get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"journalnode",node,"bcpc-hadoop",search)
+      node.default[:bcpc][:hadoop][:rm_hosts] = Bcpc::OSHelper.get_node_attributes(HOSTNAME_NODENO_ATTR_SRCH_KEYS,"resource_manager",node,"bcpc-hadoop",search)
+      node.default[:bcpc][:hadoop][:hs_hosts] = Bcpc::OSHelper.get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"historyserver",node,"bcpc-hadoop",search)
+      node.default[:bcpc][:hadoop][:dn_hosts] = Bcpc::OSHelper.get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"datanode",node,"bcpc-hadoop",search)
+      node.default[:bcpc][:hadoop][:hb_hosts] = Bcpc::OSHelper.get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"hbase_master",node,"bcpc-hadoop",search)
+      node.default[:bcpc][:hadoop][:hive_hosts] = Bcpc::OSHelper.get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"hive_metastore",node,"bcpc-hadoop",search)
+      node.default[:bcpc][:hadoop][:oozie_hosts]  =Bcpc::OSHelper.get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"oozie",node,"bcpc-hadoop",search)
+      node.default[:bcpc][:hadoop][:httpfs_hosts] = Bcpc::OSHelper.get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"httpfs",node,"bcpc-hadoop",search)
+      node.default[:bcpc][:hadoop][:rs_hosts] = Bcpc::OSHelper.get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"region_server",node,"bcpc-hadoop",search)
+      node.default[:bcpc][:hadoop][:mysql_hosts] = Bcpc::OSHelper.get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"mysql",node,"bcpc",search)
     end
     module_function :set_hosts
     

@@ -18,9 +18,9 @@ Chef::Resource.send(:include, Bcpc::OSHelper)
 # limitations under the License.
 #
 
-raise Chef::Application.fatal!("Chef reports reduced number of headnodes, see /etc/headnodes") if  ( Bcpc::OSHelper.get_cached_head_node_names - Bcpc::OSHelper.get_head_nodes(node).map{ |x| x['hostname']} ).length > 0
+raise Chef::Application.fatal!("Chef reports reduced number of headnodes, see /etc/headnodes") if  ( Bcpc::OSHelper.get_cached_head_node_names - Bcpc::OSHelper.get_head_nodes(node, method( :search )).map{ |x| x['hostname']} ).length > 0
 
 template "/etc/headnodes" do
   source "headnodes.erb"
-  variables( :servers => Bcpc::OSHelper.get_head_nodes(node))
+  variables( :servers => Bcpc::OSHelper.get_head_nodes(node, method( :search )))
 end
