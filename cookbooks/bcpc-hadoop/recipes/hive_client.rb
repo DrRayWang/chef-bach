@@ -8,13 +8,11 @@ user "hcat" do
   supports :manage_home => false
 end
 
-%w{hive hcatalog libmysql-java}.each do |pkg|
-  package pkg do
-    action :upgrade
-  end
+package 'hive-hcatalog' do
+  action :upgrade
 end
 
-link "/usr/lib/hive/lib/mysql.jar" do
-  to "/usr/share/java/mysql.jar"
+link "/usr/hdp/current/hive-server2/lib/mysql-connector-java.jar" do
+  to "/usr/share/java/mysql-connector-java.jar"
 end
 

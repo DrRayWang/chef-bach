@@ -1,4 +1,5 @@
 include_recipe 'bcpc-hadoop::hadoop_config'
+include_recipe 'bcpc-hadoop::hive_config'
 
 node.default['bcpc']['hadoop']['copylog']['datanode'] = {
     'logfile' => "/var/log/hadoop-hdfs/hadoop-hdfs-datanode-#{node.hostname}.log",
@@ -24,18 +25,6 @@ end
 
 link "/usr/hdp/2.2.0.0-2041/hadoop/lib/hadoop-lzo-0.6.0.jar" do
   to "/usr/lib/hadoop/lib/hadoop-lzo-0.6.0.jar"
-end
-
-link "/usr/lib/hadoop/lib/native/libgplcompression.la" do
-  to "/usr/lib/hadoop/lib/native/Linux-amd64-64/libgplcompression.la"
-end
-
-link "/usr/lib/hadoop/lib/native/libgplcompression.a" do
-  to "/usr/lib/hadoop/lib/native/Linux-amd64-64/libgplcompression.a"
-end
-
-link "/usr/lib/hadoop/lib/native/libgplcompression.so.0.0.0" do
-  to "/usr/lib/hadoop/lib/native/Linux-amd64-64/libgplcompression.so.0.0.0"
 end
 
 # Setup HDFS datanode bits
