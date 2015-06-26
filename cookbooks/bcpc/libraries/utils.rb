@@ -31,6 +31,39 @@ def create_databag(name)
   end
 end
 
+# encrypt the password in chef vault
+# presearch is a query list that use our own pre chef node search to get
+# node list by recipe name or role name
+def set_secret(item, data_bag, admins, clients, search, presearch,raw_data)
+  require 'chef-vault'
+  rolefilepath = "/tmp/roles"
+  clusterfilepath = "/tmp/cluster.txt"
+  nodelist = []
+  if presearch != ""
+    nodesearch = PreChef::NodeSearch.new(rolefilepath,clusterfilepath)
+    presearch.each do |query|
+      nodes = nodesearch.nodeSearch(query)
+      nodes.each do |n|
+        fullname = "#{n}.#{node['bcpc']['domain_name']}"
+        nodelist << fullname if ! nodelist.include?(fullname)
+      end 
+       
+    end
+
+  end
+  secret = Chef::Resource::ChefVaultSecret.new(item,run_context)
+  secret.id(item)
+  secret.data_bag(data_bag)
+  secret.admins(nodelist.join(","))
+  secret.search(search)
+  begin
+    chef_vault_item(data_bag,item)
+  rescue
+    secret.raw_data(raw_data)
+  end
+  secret.run_action :create_if_missing
+end
+
 # retrieve secret by key in chef vault item from chef vault data bag
 
 #

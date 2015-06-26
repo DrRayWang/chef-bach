@@ -20,7 +20,13 @@
 include_recipe "bcpc::default"
 
 make_config('haproxy-stats-user', "haproxy")
-make_config('haproxy-stats-password', secure_password)
+
+# backward compatibility
+haproxy_stats_password = get_config("haproxy-stats-password")
+if haproxy_stats_password.nil?
+  haproxy_stats_password = secure_password
+end
+set_secret("haproxy-stats", 'os', "", "","*:*",["haproxy"],{ 'password' => haproxy_stats_password })
 
 package "haproxy" do
     action :upgrade
