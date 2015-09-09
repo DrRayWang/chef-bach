@@ -38,3 +38,9 @@ bash "create-beeline-scratchroot" do
   code "hadoop fs -mkdir -p /tmp/hive-hive && hadoop fs -chmod 1777 /tmp/hive-hive && hadoop fs -chown hive /tmp/hive-hive"
   user "hdfs"
 end
+
+file "/etc/hive/conf.#{node.chef_environment}/hive.jceks" do
+  mode '0600'
+  owner 'hive'
+  group 'hive'
+end
