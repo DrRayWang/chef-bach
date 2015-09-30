@@ -6,7 +6,7 @@ chef_vault_secret "krb5-master" do
   data_bag 'os'
   raw_data({ 'password' => secure_password })
   admins bootstrap
-  search '*:*'
+  search ''
   action :nothing
 end.run_action(:create_if_missing)
 
@@ -14,7 +14,7 @@ chef_vault_secret "krb5-admin" do
   data_bag 'os'
   raw_data({ 'password' => secure_password })
   admins bootstrap
-  search '*:*'
+  search ''
   action :nothing
 end.run_action(:create_if_missing)
 
